@@ -125,26 +125,81 @@ Display realtime prediction results.
 Motion-Capture-Sign-Language-Translation/
 
 ├── dataset/
-│
+
 ├── notebooks/
-│
+
 ├── src/
-│   ├── capture.py
-│   ├── preprocess.py
-│   ├── train.py
-│   └── predict.py
-│
+│   ├── capture.py      # Hand tracking module (MediaPipe)
+│   ├── collect_data.py # Data collection with quality validation
+│   ├── preprocess.py   # Feature normalization
+│   ├── train.py        # Model training
+│   └── predict.py      # Gesture prediction
+
 ├── models/
-│
+
 ├── api/
-│
+
 ├── dashboard/
-│
+
 ├── docs/
-│
+
 ├── README.md
 └── requirements.txt
 ```
+
+---
+
+# 🖐️ Hand Tracking Module (capture.py)
+
+Real-time hand tracking menggunakan MediaPipe untuk ekstraksi 21 hand landmarks.
+
+## Fitur
+
+| Fitur | Deskripsi |
+|-------|-----------|
+| Webcam Integration | Akses webcam dengan OpenCV |
+| MediaPipe Hands | Real-time hand detection |
+| Landmark Extraction | 63 features per hand (21 landmarks × 3 coordinates) |
+| Visualization | Skeleton + landmark points + bounding boxes |
+| Debug Info | FPS counter + hand count display |
+
+## Parameter MediaPipe
+
+```python
+static_image_mode=False      # Real-time tracking mode
+max_num_hands=2             # Maximum 2 hands
+min_detection_confidence=0.7
+min_tracking_confidence=0.7
+```
+
+## Penggunaan
+
+```bash
+python -m src.capture
+```
+
+## Keyboard Controls
+
+| Key | Fungsi |
+|-----|--------|
+| `q` | Quit aplikasi |
+| `s` | Export landmarks ke console |
+| `h` | Toggle hand labels (Left/Right) |
+| `b` | Toggle bounding boxes |
+
+## Output Format
+
+Fungsi `extract_landmarks()` menghasilkan:
+```python
+[x1, y1, z1, x2, y2, z2, ..., x21, y21, z21]  # 63 features per hand
+```
+
+## Integrasi
+
+Modul ini digunakan oleh:
+- `preprocess.py` - Data normalization
+- `train.py` - Model training
+- `predict.py` - Gesture prediction
 
 # 📊 Dataset Plan
 
@@ -167,18 +222,18 @@ Dataset source:
 
 ## Phase 1 — MVP
 
+* [x] Hand Detection
+* [x] Landmark Extraction
 * [ ] Dataset Collection
-* [ ] Hand Detection
-* [ ] Landmark Extraction
 * [ ] Basic Classification
 * [ ] Text Output
 
 ## Phase 2 — Intermediate
 
+* [x] Multi-Hand Detection
 * [ ] Text-to-Speech
 * [ ] Confidence Score
 * [ ] Prediction History
-* [ ] Multi-Hand Detection
 
 ## Phase 3 — Advanced
 
@@ -267,9 +322,9 @@ Date:
 | Brainstorming      | ✅      |
 | Team Formation     | ✅      |
 | Project Planning   | ✅      |
+| Hand Tracking      | ✅      |
 | Dataset Collection | ⬜      |
 | Data Preprocessing | ⬜      |
-| Hand Tracking      | ⬜      |
 | Model Training     | ⬜      |
 | Testing            | ⬜      |
 | Deployment         | ⬜      |
