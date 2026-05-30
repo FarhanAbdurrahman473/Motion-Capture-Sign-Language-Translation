@@ -125,26 +125,156 @@ Display realtime prediction results.
 Motion-Capture-Sign-Language-Translation/
 
 ├── dataset/
-│
+
 ├── notebooks/
-│
+
 ├── src/
-│   ├── capture.py
-│   ├── preprocess.py
-│   ├── train.py
-│   └── predict.py
-│
+│   ├── capture.py      # Hand tracking module (MediaPipe)
+│   ├── collect_data.py # Data collection with quality validation
+│   ├── preprocess.py   # Feature normalization
+│   ├── train.py        # Model training
+│   └── predict.py      # Gesture prediction
+
 ├── models/
-│
+
 ├── api/
-│
+
 ├── dashboard/
-│
+
 ├── docs/
-│
+
 ├── README.md
 └── requirements.txt
 ```
+
+---
+
+# 🖐️ Hand Tracking Module (capture.py)
+
+Real-time hand tracking menggunakan MediaPipe untuk ekstraksi 21 hand landmarks.
+
+## Fitur
+
+| Fitur | Deskripsi |
+|-------|-----------|
+| Webcam Integration | Akses webcam dengan OpenCV |
+| MediaPipe Hands | Real-time hand detection |
+| Landmark Extraction | 63 features per hand (21 landmarks × 3 coordinates) |
+| Visualization | Skeleton + landmark points + bounding boxes |
+| Debug Info | FPS counter + hand count display |
+
+## Parameter MediaPipe
+
+```python
+static_image_mode=False      # Real-time tracking mode
+max_num_hands=2             # Maximum 2 hands
+min_detection_confidence=0.7
+min_tracking_confidence=0.7
+```
+
+## Penggunaan
+
+```bash
+python -m src.capture
+```
+
+## Keyboard Controls
+
+| Key | Fungsi |
+|-----|--------|
+| `q` | Quit aplikasi |
+| `s` | Export landmarks ke console |
+| `h` | Toggle hand labels (Left/Right) |
+| `b` | Toggle bounding boxes |
+
+## Output Format
+
+Fungsi `extract_landmarks()` menghasilkan:
+```python
+[x1, y1, z1, x2, y2, z2, ..., x21, y21, z21]  # 63 features per hand
+```
+
+## Integrasi
+
+Modul ini digunakan oleh:
+- `preprocess.py` - Data normalization
+- `train.py` - Model training
+- `predict.py` - Gesture prediction
+
+---
+
+# 🔧 Preprocessing Module (preprocess.py)
+
+Pipeline preprocessing untuk mengkonversi raw landmarks menjadi normalized feature vectors.
+
+## Fitur
+
+| Fitur | Deskripsi |
+|-------|-----------|
+| Landmark Validation | Validasi 63 features, NaN check |
+| Coordinate Normalization | Translation + scale invariance |
+| Label Encoding | Konversi gesture → angka (0-4) |
+| Dataset Builder | Load → Validate → Normalize → Export |
+| Data Augmentation | Noise injection, scaling |
+
+## Normalization Method
+
+```python
+# 1. Translation (wrist as origin)
+x_norm = x - wrist_x
+y_norm = y - wrist_y
+z_norm = z - wrist_z
+
+# 2. Scale normalization
+landmarks = landmarks / max(abs(landmarks))
+```
+
+## Label Encoding
+
+| Gesture | Label |
+|---------|-------|
+| Halo | 0 |
+| Makan | 1 |
+| Minum | 2 |
+| Tolong | 3 |
+| TerimaKasih | 4 |
+
+## Penggunaan
+
+```bash
+# Run complete preprocessing pipeline
+python -m src.preprocess
+
+# Load existing processed dataset
+python -m src.preprocess --load-only
+
+# Skip normalization
+python -m src.preprocess --no-normalize
+
+# Custom directories
+python -m src.preprocess --dataset dataset --output dataset/processed
+```
+
+## Output Files
+
+```
+dataset/processed/
+├── X.npy              # Feature matrix (n_samples, 63)
+├── y.npy              # Labels array (n_samples,)
+├── dataset_info.json  # Metadata
+└── dataset.csv        # Human-readable format
+```
+
+## Main Functions
+
+| Function | Deskripsi |
+|----------|-----------|
+| `validate_landmarks()` | Validasi 63 features, NaN, range |
+| `normalize_landmarks()` | Wrist-centered + scale normalization |
+| `encode_label()` | Konversi gesture → integer |
+| `build_dataset()` | Pipeline lengkap load → normalize |
+| `save_dataset()` | Export ke .npy files |
+| `print_dataset_summary()` | Statistics + visualization |
 
 # 📊 Dataset Plan
 
@@ -167,18 +297,19 @@ Dataset source:
 
 ## Phase 1 — MVP
 
+* [x] Hand Detection
+* [x] Landmark Extraction
+* [x] Data Preprocessing
 * [ ] Dataset Collection
-* [ ] Hand Detection
-* [ ] Landmark Extraction
 * [ ] Basic Classification
 * [ ] Text Output
 
 ## Phase 2 — Intermediate
 
+* [x] Multi-Hand Detection
 * [ ] Text-to-Speech
 * [ ] Confidence Score
 * [ ] Prediction History
-* [ ] Multi-Hand Detection
 
 ## Phase 3 — Advanced
 
@@ -267,9 +398,9 @@ Date:
 | Brainstorming      | ✅      |
 | Team Formation     | ✅      |
 | Project Planning   | ✅      |
+| Hand Tracking      | ✅      |
+| Data Preprocessing | ✅      |
 | Dataset Collection | ⬜      |
-| Data Preprocessing | ⬜      |
-| Hand Tracking      | ⬜      |
 | Model Training     | ⬜      |
 | Testing            | ⬜      |
 | Deployment         | ⬜      |
