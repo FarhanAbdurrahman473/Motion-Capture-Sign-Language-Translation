@@ -201,6 +201,81 @@ Modul ini digunakan oleh:
 - `train.py` - Model training
 - `predict.py` - Gesture prediction
 
+---
+
+# 🔧 Preprocessing Module (preprocess.py)
+
+Pipeline preprocessing untuk mengkonversi raw landmarks menjadi normalized feature vectors.
+
+## Fitur
+
+| Fitur | Deskripsi |
+|-------|-----------|
+| Landmark Validation | Validasi 63 features, NaN check |
+| Coordinate Normalization | Translation + scale invariance |
+| Label Encoding | Konversi gesture → angka (0-4) |
+| Dataset Builder | Load → Validate → Normalize → Export |
+| Data Augmentation | Noise injection, scaling |
+
+## Normalization Method
+
+```python
+# 1. Translation (wrist as origin)
+x_norm = x - wrist_x
+y_norm = y - wrist_y
+z_norm = z - wrist_z
+
+# 2. Scale normalization
+landmarks = landmarks / max(abs(landmarks))
+```
+
+## Label Encoding
+
+| Gesture | Label |
+|---------|-------|
+| Halo | 0 |
+| Makan | 1 |
+| Minum | 2 |
+| Tolong | 3 |
+| TerimaKasih | 4 |
+
+## Penggunaan
+
+```bash
+# Run complete preprocessing pipeline
+python -m src.preprocess
+
+# Load existing processed dataset
+python -m src.preprocess --load-only
+
+# Skip normalization
+python -m src.preprocess --no-normalize
+
+# Custom directories
+python -m src.preprocess --dataset dataset --output dataset/processed
+```
+
+## Output Files
+
+```
+dataset/processed/
+├── X.npy              # Feature matrix (n_samples, 63)
+├── y.npy              # Labels array (n_samples,)
+├── dataset_info.json  # Metadata
+└── dataset.csv        # Human-readable format
+```
+
+## Main Functions
+
+| Function | Deskripsi |
+|----------|-----------|
+| `validate_landmarks()` | Validasi 63 features, NaN, range |
+| `normalize_landmarks()` | Wrist-centered + scale normalization |
+| `encode_label()` | Konversi gesture → integer |
+| `build_dataset()` | Pipeline lengkap load → normalize |
+| `save_dataset()` | Export ke .npy files |
+| `print_dataset_summary()` | Statistics + visualization |
+
 # 📊 Dataset Plan
 
 Initial gesture classes:
@@ -224,6 +299,7 @@ Dataset source:
 
 * [x] Hand Detection
 * [x] Landmark Extraction
+* [x] Data Preprocessing
 * [ ] Dataset Collection
 * [ ] Basic Classification
 * [ ] Text Output
@@ -323,8 +399,8 @@ Date:
 | Team Formation     | ✅      |
 | Project Planning   | ✅      |
 | Hand Tracking      | ✅      |
+| Data Preprocessing | ✅      |
 | Dataset Collection | ⬜      |
-| Data Preprocessing | ⬜      |
 | Model Training     | ⬜      |
 | Testing            | ⬜      |
 | Deployment         | ⬜      |
