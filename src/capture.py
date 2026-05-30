@@ -3,14 +3,11 @@ Motion Capture Module
 
 This module handles video capture from webcam and motion tracking
 using MediaPipe for landmark extraction of hand and body movements.
+
+For data collection, use: python -m src.collect_data
+For validation, use: python -m src.validate_dataset
 """
 
-import cv2
-import mediapipe as mp
-import numpy as np
-from typing import Optional, Tuple, List, Dict
+from src.collect_data import DataCollector
 
-# TODO: Implement webcam capture loop
-# TODO: Implement MediaPipe holistic landmark detection
-# TODO: Implement landmark smoothing/normalization
-# TODO: Implement data recording to dataset directory
+__all__ = ['DataCollector']
